@@ -4,15 +4,13 @@ disease([fever, sweats, headache, body_pain, vomiting, weakness], malaria).
 disease([fever, chills, headache, sweating], malaria).
 
 %----------------Neonatal Sepsis-------------
-disease([poor_feeding, lethargy,fever, fast_breathing, grunting, irritability,jaundice, seizures,poor_cry], neonatal_sepsis).
-disease([poor_feeding, lethargy,hypothermia, fast_breathing, grunting, irritability,jaundice, seizures,poor_cry], neonatal_sepsis).
+disease([poor_feeding, lethargy, fever, fast_breathing, grunting, irritability, jaundice, seizures,poor_cry], neonatal_sepsis).
+disease([poor_feeding, lethargy, hypothermia, fast_breathing, grunting, irritability, jaundice, seizures,poor_cry], neonatal_sepsis).
 
 %-------------------------HIV/AIDS-----------
-
 disease([recurrent_fever, weight_loss, chronic_diarrhea, night_sweats, persistent_cough, oral_thrush, swollen_lymph_nodes, recurrent_infections, high_risk_exposure], hiv_aids).
 disease([fever, weight_loss, chronic_diarrhea, night_sweats, persistent_cough, oral_thrush, swollen_lymph_nodes, recurrent_infections, high_risk_exposure], hiv_aids).
 disease([recurrent_fever, weight_loss, chronic_diarrhea, night_sweats, persistent_cough, oral_thrush, swollen_lymph_nodes, recurrent_infections, young_adult], hiv_aids).
-
 
 % ---------------------------------------TB-----------------
 disease([cough_two_plus_weeks, weight_loss, fever, night_sweats, chest_pain, hemoptysis, fatigue, hiv_exposure], 'Tuberculosis').
