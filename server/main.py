@@ -1,37 +1,17 @@
 from pyswip import Prolog
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List,Optional
+from typing import List
+from models import Symptom, Disease, DiagnosisRequest, DiseaseResult, DiagnosisResponse
+from database import init_db
+from routes.auth import router as auth_router
 
 
 app = FastAPI()
+app.include_router(auth_router)
+
+init_db()
 
 prolog = Prolog()
-
-
-class Symptom(BaseModel):
-    symptom: str
-    slug: str
-
-class Disease(BaseModel):
-    disease: str
-    slug: str
-
-
-class DiagnosisRequest(BaseModel):
-    symptoms: List[str]
-    
-    
-class DiseaseResult(BaseModel):
-    name: str
-    slug: str
-    match_percentage: float
-    matching_symptoms: List[str]
-    missing_symptoms: List[str]
-
-class DiagnosisResponse(BaseModel):
-    possible_diseases: List[DiseaseResult]
-    total_diseases_checked: int 
     
 #Load the files
 prolog.consult("engine/diagnosis.pl")
