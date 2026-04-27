@@ -1,95 +1,91 @@
-from pyswip import Prolog
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
-from models import Symptom, Disease, DiagnosisRequest, DiseaseResult, DiagnosisResponse
+from models import Symptom, Disease, DiagnosisRequest, DiagnosisResponse, DiseaseResult, SAFE_ATOM
 from database import init_db
+from prolog_engine import prolog, prolog_lock, load_knowledge_base
 from routes.auth import router as auth_router
+from routes.chat import router as chat_router
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth_router)
+app.include_router(chat_router)
 
 init_db()
-
-prolog = Prolog()
-    
-#Load the files
-prolog.consult("engine/diagnosis.pl")
-prolog.consult("engine/symptoms.pl")
-prolog.consult("engine/diseases.pl")
+load_knowledge_base()
 
 
 @app.get("/symptoms", response_model=List[Symptom])
 def get_all_symptoms():
     try:
-        
-        query = "symptom(X)"
-        results = prolog.query(query)
-        
+        results = prolog.query("symptom(X)")
         symptoms = []
         for result in results:
-            item=result.get("X", "")
-            symptom_name = item.replace('_', ' ').title()
-            
-            symptoms.append(Symptom(symptom=symptom_name, slug=item))
-   
+            item = result.get("X", "")
+            symptoms.append(Symptom(symptom=item.replace("_", " ").title(), slug=item))
         symptoms.sort(key=lambda x: x.symptom)
-        
         return symptoms
-    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching symptoms: {str(e)}")
 
+
 @app.get("/diseases", response_model=List[Disease])
 def get_all_diseases():
-    """
-    Get all diseases from the Prolog knowledge base
-    """
     try:
-        # Query all disease facts from Prolog
-        query = "disease(X)"
-        results = prolog.query(query)
-        
+        results = prolog.query("disease(X)")
         diseases = []
         seen = set()
-        
         for result in results:
             item = result.get("X", "")
-            disease_name = result.get("X", "").replace('_', ' ').title()
-            
-            if disease_name not in seen:
-                seen.add(disease_name)
-                diseases.append(Disease(disease=disease_name, slug=item))
-        
-        # Sort diseases alphabetically
+            name = item.replace("_", " ").title()
+            if name not in seen:
+                seen.add(name)
+                diseases.append(Disease(disease=name, slug=item))
         diseases.sort(key=lambda x: x.disease)
         return diseases
-    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching diseases: {str(e)}")
 
 
-@app.post("/diagnose")
+@app.post("/diagnose", response_model=DiagnosisResponse)
 def diagnose(request: DiagnosisRequest):
-    """
-    Diagnose possible diseases based on provided symptoms.
-    Calls Prolog predicate: list_with_details(UserSymptoms, [D|Rest])
-    """
+    for s in request.symptoms:
+        if not SAFE_ATOM.match(s):
+            raise HTTPException(status_code=422, detail=f"Invalid symptom atom: {s}")
+
+    prolog_list = "[" + ",".join(request.symptoms) + "]"
+
     try:
-        symptoms_list = request.symptoms
-        
-        # Convert Python list to Prolog list format
-        prolog_list = "[" + ",".join(symptoms_list) + "]"
-        prolog_query = f"match(Disease, {prolog_list})"
-        
-        # Execute the query
-        prolog_results = list(prolog.query(prolog_query))
-  
-        if prolog_results:
-            # Assuming your Prolog returns something like {'Disease': 'flu'}
-            return {"diseases": prolog_results, "message": "Diagnosis complete"}
-        else:
-            return {"diseases": [], "message": "No matching disease found"}
-    
+        with prolog_lock:
+            raw = list(prolog.query(
+                f"diagnose_result({prolog_list}, Disease, Percentage, Common, Missing)"
+            ))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error during diagnosis: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Prolog error: {str(e)}")
+
+    diseases = [
+        DiseaseResult(
+            name=str(r["Disease"]).replace("_", " ").title(),
+            slug=str(r["Disease"]).lower().replace(" ", "_"),
+            match_percentage=float(r["Percentage"]),
+            matching_symptoms=[str(s) for s in r["Common"]],
+            missing_symptoms=[str(s) for s in r["Missing"]],
+        )
+        for r in raw
+    ]
+    diseases.sort(key=lambda x: x.match_percentage, reverse=True)
+
+    return DiagnosisResponse(
+        possible_diseases=diseases,
+        total_diseases_checked=len(diseases),
+    )

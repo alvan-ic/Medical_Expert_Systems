@@ -1,9 +1,30 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import JWTError
 from database import get_db
-from auth import hash_password, verify_password, create_access_token
+from auth import hash_password, verify_password, create_access_token, decode_access_token
 from models import SignupRequest, LoginRequest, TokenResponse, UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+bearer = HTTPBearer()
+
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer)) -> UserResponse:
+    try:
+        payload = decode_access_token(credentials.credentials)
+        user_id = int(payload["sub"])
+    except (JWTError, KeyError, ValueError):
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    with get_db() as conn:
+        row = conn.execute(
+            "SELECT id, first_name, last_name, email FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return UserResponse(id=row["id"], first_name=row["first_name"], last_name=row["last_name"], email=row["email"])
 
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -35,3 +56,8 @@ def login(body: LoginRequest):
 
     token = create_access_token({"sub": str(row["id"]), "email": row["email"]})
     return TokenResponse(access_token=token)
+
+
+@router.get("/me", response_model=UserResponse)
+def me(current_user: UserResponse = Depends(get_current_user)):
+    return current_user

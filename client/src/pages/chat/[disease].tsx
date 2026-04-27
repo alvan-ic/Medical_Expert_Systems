@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useState, useRef, useEffect } from "react";
+import { useUser } from "@/hooks/useUser";
 
 type Message = {
   role: "user" | "assistant";
@@ -77,6 +78,7 @@ const SUGGESTED_QUESTIONS = [
 
 export default function ChatPage() {
   const router = useRouter();
+  const { user, logout } = useUser();
   const { disease } = router.query;
   const info = (typeof disease === "string" && DISEASE_INFO[disease]) ? DISEASE_INFO[disease] : FALLBACK_INFO;
   const styles = colorStyles[info.color];
@@ -147,9 +149,22 @@ export default function ChatPage() {
           <h1 className="font-bold text-lg leading-tight">{info.label}</h1>
           <p className="text-white/70 text-xs">Medical Expert Chat</p>
         </div>
-        <div className="ml-auto flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
-          <span className="text-white/80 text-xs">Online</span>
+        <div className="ml-auto flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
+            <span className="text-white/80 text-xs">Online</span>
+          </div>
+          {user && (
+            <div className="flex items-center gap-2 border-l border-white/20 pl-3">
+              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                <span className="text-white font-bold text-xs">{user.first_name[0]}{user.last_name[0]}</span>
+              </div>
+              <span className="text-white/80 text-xs hidden sm:block">{user.first_name}</span>
+            </div>
+          )}
+          <button onClick={logout} className="text-white/60 hover:text-white text-xs transition-colors">
+            Logout
+          </button>
         </div>
       </div>
 

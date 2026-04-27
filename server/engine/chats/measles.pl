@@ -1,11 +1,10 @@
-:- module(chatbot_diagnostic_malaria, [
+:- module(chatbot_diagnostic_measles, [
     risk_factor/1,
     symptom/1,
     diagnostic_start/0,
     diagnostic_risk_evaluation_complete/1,
     prevention_tip/1,
     diagnostic_explain_factors/0,
-    % diagnostic_evaluate_risks/0,
     diagnostic_generate_report/0,
     diagnostic_factor_weight/2,
     advise/2,
@@ -17,59 +16,50 @@
 :- dynamic user_data/3.
 
 % =========================
-% Symptoms of Malaria
+% Symptoms of Measles
 % =========================
-symptom(fever).
-symptom(chills).
-symptom(headache).
-symptom(nausea).
-symptom(vomiting).
-symptom(fatigue).
-symptom(sweating).
+symptom(high_fever).
+symptom(cough).
+symptom(runny_nose).
+symptom(red_watery_eyes).
+symptom(koplik_spots).
+symptom(spreading_rash).
 
 % =========================
-% Risk Factors
+% Risk Factors / Discriminating Features
 % =========================
-risk_factor(mosquito_exposure).
-risk_factor(no_bed_net).
-risk_factor(stagnant_water_nearby).
-risk_factor(recent_travel_high_risk_area).
-risk_factor(weak_immunity).
+risk_factor(unvaccinated).
+risk_factor(rash_face_to_body).
+risk_factor(intense_systemic_symptoms).
 
 % =========================
 % Weights
 % =========================
-diagnostic_factor_weight(fever, 10).
-diagnostic_factor_weight(chills, 8).
-diagnostic_factor_weight(headache, 6).
-diagnostic_factor_weight(nausea, 5).
-diagnostic_factor_weight(vomiting, 6).
-diagnostic_factor_weight(fatigue, 5).
-diagnostic_factor_weight(sweating, 6).
+diagnostic_factor_weight(high_fever, 10).
+diagnostic_factor_weight(cough, 7).
+diagnostic_factor_weight(runny_nose, 7).
+diagnostic_factor_weight(red_watery_eyes, 8).
+diagnostic_factor_weight(koplik_spots, 10).
+diagnostic_factor_weight(spreading_rash, 10).
 
-diagnostic_factor_weight(mosquito_exposure, 8).
-diagnostic_factor_weight(no_bed_net, 6).
-diagnostic_factor_weight(stagnant_water_nearby, 7).
-diagnostic_factor_weight(recent_travel_high_risk_area, 9).
-diagnostic_factor_weight(weak_immunity, 7).
+diagnostic_factor_weight(unvaccinated, 9).
+diagnostic_factor_weight(rash_face_to_body, 10).
+diagnostic_factor_weight(intense_systemic_symptoms, 8).
 
 % =========================
 % Questions
 % =========================
 collect_data :-
-    ask_question("Do you have fever? (yes/no/sometimes)", fever),
-    ask_question("Do you experience chills? (yes/no/sometimes)", chills),
-    ask_question("Do you have headaches? (yes/no/sometimes)", headache),
-    ask_question("Do you feel nausea? (yes/no/sometimes)", nausea),
-    ask_question("Are you vomiting? (yes/no/sometimes)", vomiting),
-    ask_question("Do you feel fatigue? (yes/no/sometimes)", fatigue),
-    ask_question("Do you sweat excessively? (yes/no/sometimes)", sweating),
+    ask_question("Do you have a high fever? (yes/no/sometimes)", high_fever),
+    ask_question("Do you have a cough? (yes/no/sometimes)", cough),
+    ask_question("Do you have a runny nose? (yes/no/sometimes)", runny_nose),
+    ask_question("Do you have red or watery eyes? (yes/no/sometimes)", red_watery_eyes),
+    ask_question("Do you have small white spots inside the mouth (Koplik spots)? (yes/no/sometimes)", koplik_spots),
+    ask_question("Do you have a rash spreading across the body? (yes/no/sometimes)", spreading_rash),
 
-    ask_question("Are you frequently exposed to mosquitoes? (yes/no/sometimes)", mosquito_exposure),
-    ask_question("Do you sleep without a mosquito net? (yes/no/sometimes)", no_bed_net),
-    ask_question("Is there stagnant water near your home? (yes/no/sometimes)", stagnant_water_nearby),
-    ask_question("Have you recently traveled to a high-risk malaria area? (yes/no)", recent_travel_high_risk_area),
-    ask_question("Do you have weak immunity? (yes/no/sometimes)", weak_immunity).
+    ask_question("Is the child unvaccinated for measles? (yes/no)", unvaccinated),
+    ask_question("Did the rash start on the face and spread downward? (yes/no/sometimes)", rash_face_to_body),
+    ask_question("Are the symptoms severe and affecting the whole body? (yes/no/sometimes)", intense_systemic_symptoms).
 
 % =========================
 % Input Handling
@@ -126,23 +116,23 @@ diagnostic_risk_evaluation_complete(Probability) :-
 % =========================
 advise(Probability, Advice) :-
     (Probability >= 70 ->
-        Advice = "HIGH risk of malaria. Seek medical attention immediately and get tested.";
+        Advice = "HIGH risk of measles. Seek immediate medical attention and isolate to prevent spread.";
      Probability >= 40 ->
-        Advice = "MODERATE risk of malaria. Monitor symptoms and consider medical testing.";
-     Advice = "LOW risk of malaria. Continue preventive measures.").
+        Advice = "MODERATE risk. Consult a healthcare provider and monitor closely.";
+     Advice = "LOW risk. Continue monitoring and ensure vaccination status is up to date.").
 
 % =========================
 % Prevention Tips
 % =========================
-prevention_tip("Sleep under insecticide-treated mosquito nets.").
-prevention_tip("Use mosquito repellents on exposed skin.").
-prevention_tip("Eliminate stagnant water around your home.").
-prevention_tip("Wear protective clothing, especially at night.").
-prevention_tip("Ensure proper drainage systems.").
-prevention_tip("Take antimalarial drugs when traveling to high-risk areas.").
+prevention_tip("Ensure children receive measles vaccination (MMR vaccine).").
+prevention_tip("Avoid close contact with infected individuals.").
+prevention_tip("Maintain good hygiene practices.").
+prevention_tip("Isolate infected individuals to prevent spread.").
+prevention_tip("Boost immunity through proper nutrition.").
+prevention_tip("Seek early medical care if symptoms appear.").
 
 display_prevention_tips :-
-    writeln("=== Malaria Prevention Tips ==="),
+    writeln("=== Measles Prevention Tips ==="),
     findall(Tip, prevention_tip(Tip), Tips),
     display_tips(Tips).
 
@@ -155,12 +145,12 @@ display_tips([H|T]) :-
 % Report
 % =========================
 diagnostic_generate_report :-
-    writeln("=== Malaria Diagnostic Report ==="),
+    writeln("=== Measles Diagnostic Report ==="),
     findall((F,R,S), user_data(F,R,S), Data),
     display_data(Data),
     diagnostic_risk_evaluation_complete(P),
     advise(P, A),
-    format("Estimated Malaria Risk: ~2f%%~n", [P]),
+    format("Estimated Risk: ~2f%%~n", [P]),
     format("Advice: ~w~n", [A]).
 
 display_data([]).
@@ -172,7 +162,7 @@ display_data([(F,R,S)|T]) :-
 % Explanation
 % =========================
 diagnostic_explain_factors :-
-    writeln("=== Malaria Symptoms ==="),
+    writeln("=== Measles Symptoms ==="),
     findall(S, symptom(S), Symptoms),
     writeln(Symptoms),
     writeln("\n=== Risk Factors ==="),
@@ -183,9 +173,9 @@ diagnostic_explain_factors :-
 % Main Menu
 % =========================
 diagnostic_start :-
-    writeln("Welcome to the Malaria Diagnostic Chatbot!"),
+    writeln("Welcome to the Measles Diagnostic Chatbot!"),
     writeln("1. Evaluate symptoms"),
-    writeln("2. Learn about malaria"),
+    writeln("2. Learn about measles"),
     writeln("3. Prevention tips"),
     writeln("4. Generate report"),
     writeln("5. Quit"),

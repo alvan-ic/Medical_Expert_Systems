@@ -1,11 +1,10 @@
-:- module(chatbot_diagnostic_malaria, [
+:- module(chatbot_diagnostic_hiv_aids, [
     risk_factor/1,
     symptom/1,
     diagnostic_start/0,
     diagnostic_risk_evaluation_complete/1,
     prevention_tip/1,
     diagnostic_explain_factors/0,
-    % diagnostic_evaluate_risks/0,
     diagnostic_generate_report/0,
     diagnostic_factor_weight/2,
     advise/2,
@@ -17,59 +16,59 @@
 :- dynamic user_data/3.
 
 % =========================
-% Symptoms of Malaria
+% Symptoms of HIV/AIDS
 % =========================
-symptom(fever).
-symptom(chills).
-symptom(headache).
-symptom(nausea).
-symptom(vomiting).
-symptom(fatigue).
-symptom(sweating).
+symptom(recurrent_fever).
+symptom(weight_loss).
+symptom(chronic_diarrhea).
+symptom(night_sweats).
+symptom(persistent_cough).
+symptom(oral_thrush).
+symptom(swollen_lymph_nodes).
+symptom(recurrent_infections).
 
 % =========================
 % Risk Factors
 % =========================
-risk_factor(mosquito_exposure).
-risk_factor(no_bed_net).
-risk_factor(stagnant_water_nearby).
-risk_factor(recent_travel_high_risk_area).
-risk_factor(weak_immunity).
+risk_factor(high_risk_exposure).
+risk_factor(opportunistic_infections).
+risk_factor(prolonged_illness).
+risk_factor(mucocutaneous_candidiasis).
 
 % =========================
 % Weights
 % =========================
-diagnostic_factor_weight(fever, 10).
-diagnostic_factor_weight(chills, 8).
-diagnostic_factor_weight(headache, 6).
-diagnostic_factor_weight(nausea, 5).
-diagnostic_factor_weight(vomiting, 6).
-diagnostic_factor_weight(fatigue, 5).
-diagnostic_factor_weight(sweating, 6).
+diagnostic_factor_weight(recurrent_fever, 8).
+diagnostic_factor_weight(weight_loss, 9).
+diagnostic_factor_weight(chronic_diarrhea, 8).
+diagnostic_factor_weight(night_sweats, 7).
+diagnostic_factor_weight(persistent_cough, 7).
+diagnostic_factor_weight(oral_thrush, 9).
+diagnostic_factor_weight(swollen_lymph_nodes, 7).
+diagnostic_factor_weight(recurrent_infections, 9).
 
-diagnostic_factor_weight(mosquito_exposure, 8).
-diagnostic_factor_weight(no_bed_net, 6).
-diagnostic_factor_weight(stagnant_water_nearby, 7).
-diagnostic_factor_weight(recent_travel_high_risk_area, 9).
-diagnostic_factor_weight(weak_immunity, 7).
+diagnostic_factor_weight(high_risk_exposure, 10).
+diagnostic_factor_weight(opportunistic_infections, 10).
+diagnostic_factor_weight(prolonged_illness, 8).
+diagnostic_factor_weight(mucocutaneous_candidiasis, 9).
 
 % =========================
 % Questions
 % =========================
 collect_data :-
-    ask_question("Do you have fever? (yes/no/sometimes)", fever),
-    ask_question("Do you experience chills? (yes/no/sometimes)", chills),
-    ask_question("Do you have headaches? (yes/no/sometimes)", headache),
-    ask_question("Do you feel nausea? (yes/no/sometimes)", nausea),
-    ask_question("Are you vomiting? (yes/no/sometimes)", vomiting),
-    ask_question("Do you feel fatigue? (yes/no/sometimes)", fatigue),
-    ask_question("Do you sweat excessively? (yes/no/sometimes)", sweating),
+    ask_question("Do you experience recurrent fever? (yes/no/sometimes)", recurrent_fever),
+    ask_question("Have you had significant unexplained weight loss? (yes/no/sometimes)", weight_loss),
+    ask_question("Do you have chronic diarrhea? (yes/no/sometimes)", chronic_diarrhea),
+    ask_question("Do you experience night sweats? (yes/no/sometimes)", night_sweats),
+    ask_question("Do you have a persistent cough? (yes/no/sometimes)", persistent_cough),
+    ask_question("Do you have oral thrush (white patches in mouth)? (yes/no/sometimes)", oral_thrush),
+    ask_question("Do you have swollen lymph nodes? (yes/no/sometimes)", swollen_lymph_nodes),
+    ask_question("Do you frequently get infections? (yes/no/sometimes)", recurrent_infections),
 
-    ask_question("Are you frequently exposed to mosquitoes? (yes/no/sometimes)", mosquito_exposure),
-    ask_question("Do you sleep without a mosquito net? (yes/no/sometimes)", no_bed_net),
-    ask_question("Is there stagnant water near your home? (yes/no/sometimes)", stagnant_water_nearby),
-    ask_question("Have you recently traveled to a high-risk malaria area? (yes/no)", recent_travel_high_risk_area),
-    ask_question("Do you have weak immunity? (yes/no/sometimes)", weak_immunity).
+    ask_question("Have you had high-risk exposure (e.g., unprotected sex, shared needles)? (yes/no)", high_risk_exposure),
+    ask_question("Have you been diagnosed with opportunistic infections? (yes/no/sometimes)", opportunistic_infections),
+    ask_question("Have you had prolonged unexplained illness? (yes/no/sometimes)", prolonged_illness),
+    ask_question("Do you have persistent fungal infections (mucocutaneous candidiasis)? (yes/no/sometimes)", mucocutaneous_candidiasis).
 
 % =========================
 % Input Handling
@@ -126,23 +125,23 @@ diagnostic_risk_evaluation_complete(Probability) :-
 % =========================
 advise(Probability, Advice) :-
     (Probability >= 70 ->
-        Advice = "HIGH risk of malaria. Seek medical attention immediately and get tested.";
+        Advice = "HIGH risk of HIV/AIDS. Seek immediate medical testing and counseling.";
      Probability >= 40 ->
-        Advice = "MODERATE risk of malaria. Monitor symptoms and consider medical testing.";
-     Advice = "LOW risk of malaria. Continue preventive measures.").
+        Advice = "MODERATE risk. It is strongly recommended to get tested for HIV.";
+     Advice = "LOW risk. Maintain safe practices and consider routine testing.").
 
 % =========================
 % Prevention Tips
 % =========================
-prevention_tip("Sleep under insecticide-treated mosquito nets.").
-prevention_tip("Use mosquito repellents on exposed skin.").
-prevention_tip("Eliminate stagnant water around your home.").
-prevention_tip("Wear protective clothing, especially at night.").
-prevention_tip("Ensure proper drainage systems.").
-prevention_tip("Take antimalarial drugs when traveling to high-risk areas.").
+prevention_tip("Practice safe sex using condoms.").
+prevention_tip("Avoid sharing needles or sharp objects.").
+prevention_tip("Get regularly tested for HIV.").
+prevention_tip("Use pre-exposure prophylaxis (PrEP) if at high risk.").
+prevention_tip("Ensure safe blood transfusions.").
+prevention_tip("Seek early treatment if diagnosed to prevent progression.").
 
 display_prevention_tips :-
-    writeln("=== Malaria Prevention Tips ==="),
+    writeln("=== HIV/AIDS Prevention Tips ==="),
     findall(Tip, prevention_tip(Tip), Tips),
     display_tips(Tips).
 
@@ -155,12 +154,12 @@ display_tips([H|T]) :-
 % Report
 % =========================
 diagnostic_generate_report :-
-    writeln("=== Malaria Diagnostic Report ==="),
+    writeln("=== HIV/AIDS Diagnostic Report ==="),
     findall((F,R,S), user_data(F,R,S), Data),
     display_data(Data),
     diagnostic_risk_evaluation_complete(P),
     advise(P, A),
-    format("Estimated Malaria Risk: ~2f%%~n", [P]),
+    format("Estimated Risk: ~2f%%~n", [P]),
     format("Advice: ~w~n", [A]).
 
 display_data([]).
@@ -172,7 +171,7 @@ display_data([(F,R,S)|T]) :-
 % Explanation
 % =========================
 diagnostic_explain_factors :-
-    writeln("=== Malaria Symptoms ==="),
+    writeln("=== HIV/AIDS Symptoms ==="),
     findall(S, symptom(S), Symptoms),
     writeln(Symptoms),
     writeln("\n=== Risk Factors ==="),
@@ -183,9 +182,9 @@ diagnostic_explain_factors :-
 % Main Menu
 % =========================
 diagnostic_start :-
-    writeln("Welcome to the Malaria Diagnostic Chatbot!"),
+    writeln("Welcome to the HIV/AIDS Diagnostic Chatbot!"),
     writeln("1. Evaluate symptoms"),
-    writeln("2. Learn about malaria"),
+    writeln("2. Learn about HIV/AIDS"),
     writeln("3. Prevention tips"),
     writeln("4. Generate report"),
     writeln("5. Quit"),

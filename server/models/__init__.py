@@ -1,5 +1,8 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
+import re
+
+SAFE_ATOM = re.compile(r'^[a-z][a-z0-9_]*$')
 
 
 class Symptom(BaseModel):
@@ -25,6 +28,36 @@ class DiseaseResult(BaseModel):
 class DiagnosisResponse(BaseModel):
     possible_diseases: List[DiseaseResult]
     total_diseases_checked: int
+
+
+class QuestionFactor(BaseModel):
+    factor: str
+    label: str
+
+class QuestionsResponse(BaseModel):
+    symptoms: List[QuestionFactor]
+    risk_factors: List[QuestionFactor]
+
+class AnswerItem(BaseModel):
+    factor: str
+    response: str  # "yes", "no", "sometimes"
+    severity: Optional[int] = 0
+
+    def validate_prolog_safe(self):
+        if not SAFE_ATOM.match(self.factor):
+            raise ValueError(f"Invalid factor: {self.factor}")
+        if self.response not in ("yes", "no", "sometimes"):
+            raise ValueError(f"Invalid response: {self.response}")
+        if self.severity is not None and not (0 <= self.severity <= 10):
+            raise ValueError(f"Severity must be 0–10")
+
+class DiagnoseRequest(BaseModel):
+    answers: List[AnswerItem]
+
+class DiagnoseResponse(BaseModel):
+    probability: float
+    advice: str
+    risk_level: str  # "HIGH", "MODERATE", "LOW"
 
 
 # Auth models

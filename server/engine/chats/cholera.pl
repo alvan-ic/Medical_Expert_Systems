@@ -1,11 +1,10 @@
-:- module(chatbot_diagnostic_malaria, [
+:- module(chatbot_diagnostic_cholera, [
     risk_factor/1,
     symptom/1,
     diagnostic_start/0,
     diagnostic_risk_evaluation_complete/1,
     prevention_tip/1,
     diagnostic_explain_factors/0,
-    % diagnostic_evaluate_risks/0,
     diagnostic_generate_report/0,
     diagnostic_factor_weight/2,
     advise/2,
@@ -17,59 +16,50 @@
 :- dynamic user_data/3.
 
 % =========================
-% Symptoms of Malaria
+% Symptoms of Cholera
 % =========================
-symptom(fever).
-symptom(chills).
-symptom(headache).
-symptom(nausea).
+symptom(watery_diarrhea).
 symptom(vomiting).
-symptom(fatigue).
-symptom(sweating).
+symptom(severe_dehydration).
+symptom(muscle_cramps).
+symptom(sunken_eyes).
 
 % =========================
-% Risk Factors
+% Risk Factors / Discriminating Features
 % =========================
-risk_factor(mosquito_exposure).
-risk_factor(no_bed_net).
-risk_factor(stagnant_water_nearby).
-risk_factor(recent_travel_high_risk_area).
-risk_factor(weak_immunity).
+risk_factor(unsafe_water_exposure).
+risk_factor(outbreak_exposure).
+risk_factor(rice_water_stool).
+risk_factor(rapid_dehydration).
 
 % =========================
 % Weights
 % =========================
-diagnostic_factor_weight(fever, 10).
-diagnostic_factor_weight(chills, 8).
-diagnostic_factor_weight(headache, 6).
-diagnostic_factor_weight(nausea, 5).
-diagnostic_factor_weight(vomiting, 6).
-diagnostic_factor_weight(fatigue, 5).
-diagnostic_factor_weight(sweating, 6).
+diagnostic_factor_weight(watery_diarrhea, 10).
+diagnostic_factor_weight(vomiting, 8).
+diagnostic_factor_weight(severe_dehydration, 10).
+diagnostic_factor_weight(muscle_cramps, 7).
+diagnostic_factor_weight(sunken_eyes, 8).
 
-diagnostic_factor_weight(mosquito_exposure, 8).
-diagnostic_factor_weight(no_bed_net, 6).
-diagnostic_factor_weight(stagnant_water_nearby, 7).
-diagnostic_factor_weight(recent_travel_high_risk_area, 9).
-diagnostic_factor_weight(weak_immunity, 7).
+diagnostic_factor_weight(unsafe_water_exposure, 9).
+diagnostic_factor_weight(outbreak_exposure, 9).
+diagnostic_factor_weight(rice_water_stool, 10).
+diagnostic_factor_weight(rapid_dehydration, 10).
 
 % =========================
 % Questions
 % =========================
 collect_data :-
-    ask_question("Do you have fever? (yes/no/sometimes)", fever),
-    ask_question("Do you experience chills? (yes/no/sometimes)", chills),
-    ask_question("Do you have headaches? (yes/no/sometimes)", headache),
-    ask_question("Do you feel nausea? (yes/no/sometimes)", nausea),
+    ask_question("Do you have sudden watery diarrhea? (yes/no/sometimes)", watery_diarrhea),
     ask_question("Are you vomiting? (yes/no/sometimes)", vomiting),
-    ask_question("Do you feel fatigue? (yes/no/sometimes)", fatigue),
-    ask_question("Do you sweat excessively? (yes/no/sometimes)", sweating),
+    ask_question("Are you experiencing signs of severe dehydration (e.g., extreme thirst, dry mouth)? (yes/no/sometimes)", severe_dehydration),
+    ask_question("Do you have muscle cramps? (yes/no/sometimes)", muscle_cramps),
+    ask_question("Do you have sunken eyes? (yes/no/sometimes)", sunken_eyes),
 
-    ask_question("Are you frequently exposed to mosquitoes? (yes/no/sometimes)", mosquito_exposure),
-    ask_question("Do you sleep without a mosquito net? (yes/no/sometimes)", no_bed_net),
-    ask_question("Is there stagnant water near your home? (yes/no/sometimes)", stagnant_water_nearby),
-    ask_question("Have you recently traveled to a high-risk malaria area? (yes/no)", recent_travel_high_risk_area),
-    ask_question("Do you have weak immunity? (yes/no/sometimes)", weak_immunity).
+    ask_question("Have you recently consumed unsafe or contaminated water? (yes/no)", unsafe_water_exposure),
+    ask_question("Are you in or recently exposed to a cholera outbreak area? (yes/no)", outbreak_exposure),
+    ask_question("Is your stool pale and watery like 'rice-water'? (yes/no/sometimes)", rice_water_stool),
+    ask_question("Did dehydration occur very rapidly? (yes/no/sometimes)", rapid_dehydration).
 
 % =========================
 % Input Handling
@@ -126,23 +116,23 @@ diagnostic_risk_evaluation_complete(Probability) :-
 % =========================
 advise(Probability, Advice) :-
     (Probability >= 70 ->
-        Advice = "HIGH risk of malaria. Seek medical attention immediately and get tested.";
+        Advice = "HIGH risk of cholera. Seek immediate medical attention and start oral rehydration therapy urgently.";
      Probability >= 40 ->
-        Advice = "MODERATE risk of malaria. Monitor symptoms and consider medical testing.";
-     Advice = "LOW risk of malaria. Continue preventive measures.").
+        Advice = "MODERATE risk. Begin rehydration and consult a healthcare provider as soon as possible.";
+     Advice = "LOW risk. Maintain hydration and monitor symptoms closely.").
 
 % =========================
 % Prevention Tips
 % =========================
-prevention_tip("Sleep under insecticide-treated mosquito nets.").
-prevention_tip("Use mosquito repellents on exposed skin.").
-prevention_tip("Eliminate stagnant water around your home.").
-prevention_tip("Wear protective clothing, especially at night.").
-prevention_tip("Ensure proper drainage systems.").
-prevention_tip("Take antimalarial drugs when traveling to high-risk areas.").
+prevention_tip("Drink only safe and treated water.").
+prevention_tip("Wash hands regularly with soap and clean water.").
+prevention_tip("Avoid eating raw or undercooked food.").
+prevention_tip("Use proper sanitation and toilet facilities.").
+prevention_tip("Boil or treat water before drinking.").
+prevention_tip("Maintain good food hygiene practices.").
 
 display_prevention_tips :-
-    writeln("=== Malaria Prevention Tips ==="),
+    writeln("=== Cholera Prevention Tips ==="),
     findall(Tip, prevention_tip(Tip), Tips),
     display_tips(Tips).
 
@@ -155,12 +145,12 @@ display_tips([H|T]) :-
 % Report
 % =========================
 diagnostic_generate_report :-
-    writeln("=== Malaria Diagnostic Report ==="),
+    writeln("=== Cholera Diagnostic Report ==="),
     findall((F,R,S), user_data(F,R,S), Data),
     display_data(Data),
     diagnostic_risk_evaluation_complete(P),
     advise(P, A),
-    format("Estimated Malaria Risk: ~2f%%~n", [P]),
+    format("Estimated Risk: ~2f%%~n", [P]),
     format("Advice: ~w~n", [A]).
 
 display_data([]).
@@ -172,7 +162,7 @@ display_data([(F,R,S)|T]) :-
 % Explanation
 % =========================
 diagnostic_explain_factors :-
-    writeln("=== Malaria Symptoms ==="),
+    writeln("=== Cholera Symptoms ==="),
     findall(S, symptom(S), Symptoms),
     writeln(Symptoms),
     writeln("\n=== Risk Factors ==="),
@@ -183,9 +173,9 @@ diagnostic_explain_factors :-
 % Main Menu
 % =========================
 diagnostic_start :-
-    writeln("Welcome to the Malaria Diagnostic Chatbot!"),
+    writeln("Welcome to the Cholera Diagnostic Chatbot!"),
     writeln("1. Evaluate symptoms"),
-    writeln("2. Learn about malaria"),
+    writeln("2. Learn about cholera"),
     writeln("3. Prevention tips"),
     writeln("4. Generate report"),
     writeln("5. Quit"),

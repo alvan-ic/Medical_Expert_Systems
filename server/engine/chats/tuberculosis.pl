@@ -1,11 +1,10 @@
-:- module(chatbot_diagnostic_malaria, [
+:- module(chatbot_diagnostic_tuberculosis, [
     risk_factor/1,
     symptom/1,
     diagnostic_start/0,
     diagnostic_risk_evaluation_complete/1,
     prevention_tip/1,
     diagnostic_explain_factors/0,
-    % diagnostic_evaluate_risks/0,
     diagnostic_generate_report/0,
     diagnostic_factor_weight/2,
     advise/2,
@@ -17,59 +16,59 @@
 :- dynamic user_data/3.
 
 % =========================
-% Symptoms of Malaria
+% Symptoms of Tuberculosis
 % =========================
+symptom(chronic_cough).
+symptom(weight_loss).
 symptom(fever).
-symptom(chills).
-symptom(headache).
-symptom(nausea).
-symptom(vomiting).
+symptom(night_sweats).
+symptom(chest_pain).
+symptom(hemoptysis).
 symptom(fatigue).
-symptom(sweating).
 
 % =========================
-% Risk Factors
+% Risk Factors / Discriminating Features
 % =========================
-risk_factor(mosquito_exposure).
-risk_factor(no_bed_net).
-risk_factor(stagnant_water_nearby).
-risk_factor(recent_travel_high_risk_area).
-risk_factor(weak_immunity).
+risk_factor(hiv_exposure).
+risk_factor(close_tb_contact).
+risk_factor(reduced_appetite).
+risk_factor(cervical_lymph_node_swelling).
+risk_factor(persistent_low_grade_fever).
 
 % =========================
 % Weights
 % =========================
-diagnostic_factor_weight(fever, 10).
-diagnostic_factor_weight(chills, 8).
-diagnostic_factor_weight(headache, 6).
-diagnostic_factor_weight(nausea, 5).
-diagnostic_factor_weight(vomiting, 6).
-diagnostic_factor_weight(fatigue, 5).
-diagnostic_factor_weight(sweating, 6).
+diagnostic_factor_weight(chronic_cough, 10).
+diagnostic_factor_weight(weight_loss, 8).
+diagnostic_factor_weight(fever, 7).
+diagnostic_factor_weight(night_sweats, 8).
+diagnostic_factor_weight(chest_pain, 7).
+diagnostic_factor_weight(hemoptysis, 10).
+diagnostic_factor_weight(fatigue, 6).
 
-diagnostic_factor_weight(mosquito_exposure, 8).
-diagnostic_factor_weight(no_bed_net, 6).
-diagnostic_factor_weight(stagnant_water_nearby, 7).
-diagnostic_factor_weight(recent_travel_high_risk_area, 9).
-diagnostic_factor_weight(weak_immunity, 7).
+diagnostic_factor_weight(hiv_exposure, 9).
+diagnostic_factor_weight(close_tb_contact, 10).
+diagnostic_factor_weight(reduced_appetite, 7).
+diagnostic_factor_weight(cervical_lymph_node_swelling, 8).
+diagnostic_factor_weight(persistent_low_grade_fever, 8).
 
 % =========================
 % Questions
 % =========================
 collect_data :-
-    ask_question("Do you have fever? (yes/no/sometimes)", fever),
-    ask_question("Do you experience chills? (yes/no/sometimes)", chills),
-    ask_question("Do you have headaches? (yes/no/sometimes)", headache),
-    ask_question("Do you feel nausea? (yes/no/sometimes)", nausea),
-    ask_question("Are you vomiting? (yes/no/sometimes)", vomiting),
-    ask_question("Do you feel fatigue? (yes/no/sometimes)", fatigue),
-    ask_question("Do you sweat excessively? (yes/no/sometimes)", sweating),
+    ask_question("Have you had a cough lasting more than 2 weeks? (yes/no/sometimes)", chronic_cough),
+    ask_question("Have you experienced unexplained weight loss? (yes/no/sometimes)", weight_loss),
+    ask_question("Do you have a fever? (yes/no/sometimes)", fever),
+    ask_question("Do you experience night sweats? (yes/no/sometimes)", night_sweats),
+    ask_question("Do you have chest pain? (yes/no/sometimes)", chest_pain),
+    ask_question("Have you coughed up blood (hemoptysis)? (yes/no/sometimes)", hemoptysis),
+    ask_question("Do you feel persistent fatigue? (yes/no/sometimes)", fatigue),
 
-    ask_question("Are you frequently exposed to mosquitoes? (yes/no/sometimes)", mosquito_exposure),
-    ask_question("Do you sleep without a mosquito net? (yes/no/sometimes)", no_bed_net),
-    ask_question("Is there stagnant water near your home? (yes/no/sometimes)", stagnant_water_nearby),
-    ask_question("Have you recently traveled to a high-risk malaria area? (yes/no)", recent_travel_high_risk_area),
-    ask_question("Do you have weak immunity? (yes/no/sometimes)", weak_immunity).
+    ask_question("Have you been exposed to someone with HIV? (yes/no)", hiv_exposure),
+    ask_question("Have you had close contact with a TB patient? (yes/no)", close_tb_contact),
+    ask_question("Do you have reduced appetite? (yes/no/sometimes)", reduced_appetite),
+    ask_question("Do you have swollen lymph nodes in the neck? (yes/no/sometimes)", cervical_lymph_node_swelling),
+    ask_question("Do you have a persistent low-grade fever? (yes/no/sometimes)", persistent_low_grade_fever).
 
 % =========================
 % Input Handling
@@ -126,23 +125,23 @@ diagnostic_risk_evaluation_complete(Probability) :-
 % =========================
 advise(Probability, Advice) :-
     (Probability >= 70 ->
-        Advice = "HIGH risk of malaria. Seek medical attention immediately and get tested.";
+        Advice = "HIGH risk of Tuberculosis. Seek immediate medical testing (e.g., sputum test, chest X-ray).";
      Probability >= 40 ->
-        Advice = "MODERATE risk of malaria. Monitor symptoms and consider medical testing.";
-     Advice = "LOW risk of malaria. Continue preventive measures.").
+        Advice = "MODERATE risk. Visit a healthcare provider for evaluation and possible TB screening.";
+     Advice = "LOW risk. Maintain good health practices but monitor symptoms closely.").
 
 % =========================
 % Prevention Tips
 % =========================
-prevention_tip("Sleep under insecticide-treated mosquito nets.").
-prevention_tip("Use mosquito repellents on exposed skin.").
-prevention_tip("Eliminate stagnant water around your home.").
-prevention_tip("Wear protective clothing, especially at night.").
-prevention_tip("Ensure proper drainage systems.").
-prevention_tip("Take antimalarial drugs when traveling to high-risk areas.").
+prevention_tip("Ensure good ventilation in living spaces.").
+prevention_tip("Avoid close contact with individuals known to have active TB.").
+prevention_tip("Cover mouth when coughing or sneezing.").
+prevention_tip("Get tested if you are at risk or exposed.").
+prevention_tip("Complete full TB treatment if diagnosed.").
+prevention_tip("Boost immunity through proper nutrition and healthcare.").
 
 display_prevention_tips :-
-    writeln("=== Malaria Prevention Tips ==="),
+    writeln("=== Tuberculosis Prevention Tips ==="),
     findall(Tip, prevention_tip(Tip), Tips),
     display_tips(Tips).
 
@@ -155,12 +154,12 @@ display_tips([H|T]) :-
 % Report
 % =========================
 diagnostic_generate_report :-
-    writeln("=== Malaria Diagnostic Report ==="),
+    writeln("=== Tuberculosis Diagnostic Report ==="),
     findall((F,R,S), user_data(F,R,S), Data),
     display_data(Data),
     diagnostic_risk_evaluation_complete(P),
     advise(P, A),
-    format("Estimated Malaria Risk: ~2f%%~n", [P]),
+    format("Estimated Risk: ~2f%%~n", [P]),
     format("Advice: ~w~n", [A]).
 
 display_data([]).
@@ -172,7 +171,7 @@ display_data([(F,R,S)|T]) :-
 % Explanation
 % =========================
 diagnostic_explain_factors :-
-    writeln("=== Malaria Symptoms ==="),
+    writeln("=== Tuberculosis Symptoms ==="),
     findall(S, symptom(S), Symptoms),
     writeln(Symptoms),
     writeln("\n=== Risk Factors ==="),
@@ -183,9 +182,9 @@ diagnostic_explain_factors :-
 % Main Menu
 % =========================
 diagnostic_start :-
-    writeln("Welcome to the Malaria Diagnostic Chatbot!"),
+    writeln("Welcome to the Tuberculosis Diagnostic Chatbot!"),
     writeln("1. Evaluate symptoms"),
-    writeln("2. Learn about malaria"),
+    writeln("2. Learn about tuberculosis"),
     writeln("3. Prevention tips"),
     writeln("4. Generate report"),
     writeln("5. Quit"),

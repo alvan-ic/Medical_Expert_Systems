@@ -4,16 +4,24 @@ import { useState } from "react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [form, setForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+    confirm: "",
+  });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name || !form.email || !form.password || !form.confirm) {
+
+    if (!form.first_name || !form.last_name || !form.email || !form.password || !form.confirm) {
       setError("Please fill in all fields.");
       return;
     }
@@ -21,8 +29,39 @@ export default function SignupPage() {
       setError("Passwords do not match.");
       return;
     }
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     setError("");
-    router.push("/home");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:8000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+          password: form.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || "Registration failed. Please try again.");
+        return;
+      }
+
+      // Account created — redirect to login
+      router.push("/login?registered=1");
+    } catch {
+      setError("Could not reach the server. Please ensure it is running.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -48,16 +87,30 @@ export default function SignupPage() {
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="John Doe"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm text-gray-800 bg-gray-50"
-            />
+          {/* First & Last name side by side */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">First name</label>
+              <input
+                type="text"
+                name="first_name"
+                value={form.first_name}
+                onChange={handleChange}
+                placeholder="John"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm text-gray-800 bg-gray-50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Last name</label>
+              <input
+                type="text"
+                name="last_name"
+                value={form.last_name}
+                onChange={handleChange}
+                placeholder="Doe"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm text-gray-800 bg-gray-50"
+              />
+            </div>
           </div>
 
           <div>
@@ -79,7 +132,7 @@ export default function SignupPage() {
               name="password"
               value={form.password}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder="Min. 6 characters"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm text-gray-800 bg-gray-50"
             />
           </div>
@@ -92,15 +145,33 @@ export default function SignupPage() {
               value={form.confirm}
               onChange={handleChange}
               placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm text-gray-800 bg-gray-50"
+              className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-green-400 text-sm text-gray-800 bg-gray-50 ${
+                form.confirm && form.confirm !== form.password
+                  ? "border-red-300"
+                  : "border-gray-200"
+              }`}
             />
+            {form.confirm && form.confirm !== form.password && (
+              <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+            )}
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition-colors mt-1"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition-colors mt-1 disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            Create Account
+            {loading ? (
+              <>
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                Creating account...
+              </>
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 

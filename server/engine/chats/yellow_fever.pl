@@ -1,11 +1,10 @@
-:- module(chatbot_diagnostic_malaria, [
+:- module(chatbot_diagnostic_yellow_fever, [
     risk_factor/1,
     symptom/1,
     diagnostic_start/0,
     diagnostic_risk_evaluation_complete/1,
     prevention_tip/1,
     diagnostic_explain_factors/0,
-    % diagnostic_evaluate_risks/0,
     diagnostic_generate_report/0,
     diagnostic_factor_weight/2,
     advise/2,
@@ -17,59 +16,59 @@
 :- dynamic user_data/3.
 
 % =========================
-% Symptoms of Malaria
+% Symptoms of Yellow Fever
 % =========================
-symptom(fever).
-symptom(chills).
+symptom(sudden_fever).
 symptom(headache).
+symptom(muscle_back_pain).
 symptom(nausea).
 symptom(vomiting).
-symptom(fatigue).
-symptom(sweating).
+symptom(jaundice).
+symptom(bleeding).
+symptom(black_vomit).
 
 % =========================
-% Risk Factors
+% Risk Factors / Discriminating Features
 % =========================
-risk_factor(mosquito_exposure).
-risk_factor(no_bed_net).
-risk_factor(stagnant_water_nearby).
-risk_factor(recent_travel_high_risk_area).
-risk_factor(weak_immunity).
+risk_factor(endemic_area_exposure).
+risk_factor(returning_fever).
+risk_factor(liver_involvement).
+risk_factor(hemorrhagic_signs).
 
 % =========================
 % Weights
 % =========================
-diagnostic_factor_weight(fever, 10).
-diagnostic_factor_weight(chills, 8).
-diagnostic_factor_weight(headache, 6).
-diagnostic_factor_weight(nausea, 5).
-diagnostic_factor_weight(vomiting, 6).
-diagnostic_factor_weight(fatigue, 5).
-diagnostic_factor_weight(sweating, 6).
+diagnostic_factor_weight(sudden_fever, 9).
+diagnostic_factor_weight(headache, 7).
+diagnostic_factor_weight(muscle_back_pain, 8).
+diagnostic_factor_weight(nausea, 7).
+diagnostic_factor_weight(vomiting, 7).
+diagnostic_factor_weight(jaundice, 10).
+diagnostic_factor_weight(bleeding, 10).
+diagnostic_factor_weight(black_vomit, 10).
 
-diagnostic_factor_weight(mosquito_exposure, 8).
-diagnostic_factor_weight(no_bed_net, 6).
-diagnostic_factor_weight(stagnant_water_nearby, 7).
-diagnostic_factor_weight(recent_travel_high_risk_area, 9).
-diagnostic_factor_weight(weak_immunity, 7).
+diagnostic_factor_weight(endemic_area_exposure, 10).
+diagnostic_factor_weight(returning_fever, 9).
+diagnostic_factor_weight(liver_involvement, 9).
+diagnostic_factor_weight(hemorrhagic_signs, 10).
 
 % =========================
 % Questions
 % =========================
 collect_data :-
-    ask_question("Do you have fever? (yes/no/sometimes)", fever),
-    ask_question("Do you experience chills? (yes/no/sometimes)", chills),
+    ask_question("Do you have a sudden onset of fever? (yes/no/sometimes)", sudden_fever),
     ask_question("Do you have headaches? (yes/no/sometimes)", headache),
+    ask_question("Do you have muscle or back pain? (yes/no/sometimes)", muscle_back_pain),
     ask_question("Do you feel nausea? (yes/no/sometimes)", nausea),
     ask_question("Are you vomiting? (yes/no/sometimes)", vomiting),
-    ask_question("Do you feel fatigue? (yes/no/sometimes)", fatigue),
-    ask_question("Do you sweat excessively? (yes/no/sometimes)", sweating),
+    ask_question("Do you have yellowing of the eyes or skin (jaundice)? (yes/no/sometimes)", jaundice),
+    ask_question("Are you experiencing any bleeding (e.g., gums, nose)? (yes/no/sometimes)", bleeding),
+    ask_question("Have you vomited dark or black material? (yes/no/sometimes)", black_vomit),
 
-    ask_question("Are you frequently exposed to mosquitoes? (yes/no/sometimes)", mosquito_exposure),
-    ask_question("Do you sleep without a mosquito net? (yes/no/sometimes)", no_bed_net),
-    ask_question("Is there stagnant water near your home? (yes/no/sometimes)", stagnant_water_nearby),
-    ask_question("Have you recently traveled to a high-risk malaria area? (yes/no)", recent_travel_high_risk_area),
-    ask_question("Do you have weak immunity? (yes/no/sometimes)", weak_immunity).
+    ask_question("Have you been in or traveled to an endemic area recently? (yes/no)", endemic_area_exposure),
+    ask_question("Did your fever return after initially improving? (yes/no/sometimes)", returning_fever),
+    ask_question("Have you been told you have liver problems or signs of liver involvement? (yes/no/sometimes)", liver_involvement),
+    ask_question("Are there signs of severe bleeding or hemorrhage? (yes/no/sometimes)", hemorrhagic_signs).
 
 % =========================
 % Input Handling
@@ -126,23 +125,23 @@ diagnostic_risk_evaluation_complete(Probability) :-
 % =========================
 advise(Probability, Advice) :-
     (Probability >= 70 ->
-        Advice = "HIGH risk of malaria. Seek medical attention immediately and get tested.";
+        Advice = "HIGH risk of yellow fever. Seek immediate medical attention and emergency care.";
      Probability >= 40 ->
-        Advice = "MODERATE risk of malaria. Monitor symptoms and consider medical testing.";
-     Advice = "LOW risk of malaria. Continue preventive measures.").
+        Advice = "MODERATE risk. Urgent medical evaluation is recommended.";
+     Advice = "LOW risk. Continue monitoring and ensure preventive measures.").
 
 % =========================
 % Prevention Tips
 % =========================
-prevention_tip("Sleep under insecticide-treated mosquito nets.").
-prevention_tip("Use mosquito repellents on exposed skin.").
-prevention_tip("Eliminate stagnant water around your home.").
-prevention_tip("Wear protective clothing, especially at night.").
-prevention_tip("Ensure proper drainage systems.").
-prevention_tip("Take antimalarial drugs when traveling to high-risk areas.").
+prevention_tip("Get vaccinated against yellow fever.").
+prevention_tip("Avoid mosquito bites using repellents and nets.").
+prevention_tip("Wear protective clothing in endemic areas.").
+prevention_tip("Eliminate mosquito breeding sites.").
+prevention_tip("Seek medical care early if symptoms develop.").
+prevention_tip("Avoid travel to endemic areas without vaccination.").
 
 display_prevention_tips :-
-    writeln("=== Malaria Prevention Tips ==="),
+    writeln("=== Yellow Fever Prevention Tips ==="),
     findall(Tip, prevention_tip(Tip), Tips),
     display_tips(Tips).
 
@@ -155,12 +154,12 @@ display_tips([H|T]) :-
 % Report
 % =========================
 diagnostic_generate_report :-
-    writeln("=== Malaria Diagnostic Report ==="),
+    writeln("=== Yellow Fever Diagnostic Report ==="),
     findall((F,R,S), user_data(F,R,S), Data),
     display_data(Data),
     diagnostic_risk_evaluation_complete(P),
     advise(P, A),
-    format("Estimated Malaria Risk: ~2f%%~n", [P]),
+    format("Estimated Risk: ~2f%%~n", [P]),
     format("Advice: ~w~n", [A]).
 
 display_data([]).
@@ -172,7 +171,7 @@ display_data([(F,R,S)|T]) :-
 % Explanation
 % =========================
 diagnostic_explain_factors :-
-    writeln("=== Malaria Symptoms ==="),
+    writeln("=== Yellow Fever Symptoms ==="),
     findall(S, symptom(S), Symptoms),
     writeln(Symptoms),
     writeln("\n=== Risk Factors ==="),
@@ -183,9 +182,9 @@ diagnostic_explain_factors :-
 % Main Menu
 % =========================
 diagnostic_start :-
-    writeln("Welcome to the Malaria Diagnostic Chatbot!"),
+    writeln("Welcome to the Yellow Fever Diagnostic Chatbot!"),
     writeln("1. Evaluate symptoms"),
-    writeln("2. Learn about malaria"),
+    writeln("2. Learn about yellow fever"),
     writeln("3. Prevention tips"),
     writeln("4. Generate report"),
     writeln("5. Quit"),

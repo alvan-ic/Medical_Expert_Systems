@@ -1,24 +1,51 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
+
+  useEffect(() => {
+    if (router.query.registered === "1") setRegistered(true);
+  }, [router.query]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.email || !form.password) {
       setError("Please fill in all fields.");
       return;
     }
     setError("");
-    router.push("/home");
+    setLoading(true);
+    try {
+      const res = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, password: form.password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || "Invalid email or password.");
+        return;
+      }
+
+      localStorage.setItem("access_token", data.access_token);
+      router.push("/home");
+    } catch {
+      setError("Could not reach the server. Please ensure it is running.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -36,6 +63,12 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
         <h2 className="text-2xl font-extrabold text-gray-800 mb-1">Welcome back</h2>
         <p className="text-gray-500 text-sm mb-6">Log in to your MedDiagnose account</p>
+
+        {registered && (
+          <div className="mb-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
+            Account created successfully! Please log in.
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
@@ -68,15 +101,22 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="flex justify-end">
-            <a href="#" className="text-xs text-green-600 hover:underline">Forgot password?</a>
-          </div>
-
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition-colors mt-1"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition-colors mt-1 disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            Login
+            {loading ? (
+              <>
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
 

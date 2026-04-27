@@ -1,34 +1,50 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useUser } from "@/hooks/useUser";
 
-const DISEASES = [
-  { id: "malaria", label: "Malaria", icon: "🦟", color: "green", desc: "Mosquito-borne parasitic infection" },
-  { id: "tuberculosis", label: "Tuberculosis", icon: "🫁", color: "blue", desc: "Bacterial lung infection" },
-  { id: "hiv_aids", label: "HIV/AIDS", icon: "🔬", color: "yellow", desc: "Immune system disease" },
-  { id: "pneumonia", label: "Pneumonia", icon: "💨", color: "blue", desc: "Lung inflammation" },
-  { id: "cholera", label: "Cholera", icon: "💧", color: "green", desc: "Bacterial waterborne disease" },
-  { id: "typhoid_fever", label: "Typhoid Fever", icon: "🌡️", color: "yellow", desc: "Bacterial food/water infection" },
-  { id: "diabetes_mellitus_type_2", label: "Diabetes (Type 2)", icon: "🩸", color: "yellow", desc: "Chronic metabolic disease" },
-  { id: "hypertension", label: "Hypertension", icon: "❤️", color: "blue", desc: "High blood pressure" },
-  { id: "hepatitis_b", label: "Hepatitis B", icon: "🫀", color: "green", desc: "Viral liver infection" },
-  { id: "hepatitis_c", label: "Hepatitis C", icon: "🧬", color: "yellow", desc: "Viral liver disease" },
-  { id: "bacterial_meningitis", label: "Bacterial Meningitis", icon: "🧠", color: "blue", desc: "Brain membrane infection" },
-  { id: "asthma", label: "Asthma", icon: "🌬️", color: "green", desc: "Chronic airway disease" },
-  { id: "peptic_ulcer_disease", label: "Peptic Ulcer", icon: "🫃", color: "yellow", desc: "Stomach lining sores" },
-  { id: "measles", label: "Measles", icon: "🔴", color: "blue", desc: "Viral childhood disease" },
-  { id: "urinary_tract_infection", label: "UTI", icon: "🚰", color: "green", desc: "Urinary tract infection" },
-  { id: "yellow_fever", label: "Yellow Fever", icon: "🟡", color: "yellow", desc: "Mosquito-borne viral disease" },
-  { id: "lassa_fever", label: "Lassa Fever", icon: "🐀", color: "blue", desc: "Rodent-borne viral disease" },
-  { id: "sickle_cell_disease", label: "Sickle Cell Disease", icon: "🔴", color: "green", desc: "Inherited blood disorder" },
-  { id: "chronic_kidney_disease", label: "Chronic Kidney Disease", icon: "🫘", color: "yellow", desc: "Progressive kidney damage" },
-  { id: "glaucoma", label: "Glaucoma", icon: "👁️", color: "blue", desc: "Eye pressure & vision loss" },
-  { id: "gastroenteritis", label: "Gastroenteritis", icon: "🤢", color: "green", desc: "Stomach and bowel infection" },
-  { id: "neonatal_sepsis", label: "Neonatal Sepsis", icon: "👶", color: "yellow", desc: "Newborn bloodstream infection" },
-  { id: "lymphatic_filariasis", label: "Lymphatic Filariasis", icon: "🦷", color: "blue", desc: "Parasitic lymph system disease" },
-  { id: "onchocerciasis", label: "Onchocerciasis", icon: "🪲", color: "green", desc: "River blindness disease" },
-  { id: "acute_otitis_media", label: "Otitis Media", icon: "👂", color: "yellow", desc: "Middle ear infection" },
-  { id: "pyelonephritis", label: "Pyelonephritis", icon: "🫘", color: "blue", desc: "Kidney infection" },
-];
+type ApiDisease = { disease: string; slug: string };
+
+// Icon / colour metadata keyed by slug — used as an overlay on top of API data
+const DISEASE_META: Record<string, { icon: string; color: string; desc: string }> = {
+  malaria:                   { icon: "🦟", color: "green",  desc: "Mosquito-borne parasitic infection" },
+  tuberculosis:              { icon: "🫁", color: "blue",   desc: "Bacterial lung infection" },
+  hiv_aids:                  { icon: "🔬", color: "yellow", desc: "Immune system disease" },
+  pneumonia:                 { icon: "💨", color: "blue",   desc: "Lung inflammation" },
+  cholera:                   { icon: "💧", color: "green",  desc: "Bacterial waterborne disease" },
+  typhoid_fever:             { icon: "🌡️", color: "yellow", desc: "Bacterial food/water infection" },
+  diabetes_mellitus_type_2:  { icon: "🩸", color: "yellow", desc: "Chronic metabolic disease" },
+  hypertension:              { icon: "❤️", color: "blue",   desc: "High blood pressure" },
+  hepatitis_b:               { icon: "🫀", color: "green",  desc: "Viral liver infection" },
+  hepatitis_c:               { icon: "🧬", color: "yellow", desc: "Viral liver disease" },
+  bacterial_meningitis:      { icon: "🧠", color: "blue",   desc: "Brain membrane infection" },
+  asthma:                    { icon: "🌬️", color: "green",  desc: "Chronic airway disease" },
+  peptic_ulcer_disease:      { icon: "🫃", color: "yellow", desc: "Stomach lining sores" },
+  measles:                   { icon: "🔴", color: "blue",   desc: "Viral childhood disease" },
+  urinary_tract_infection:   { icon: "🚰", color: "green",  desc: "Urinary tract infection" },
+  yellow_fever:              { icon: "🟡", color: "yellow", desc: "Mosquito-borne viral disease" },
+  lassa_fever:               { icon: "🐀", color: "blue",   desc: "Rodent-borne viral disease" },
+  sickle_cell_disease:       { icon: "🔴", color: "green",  desc: "Inherited blood disorder" },
+  chronic_kidney_disease:    { icon: "🫘", color: "yellow", desc: "Progressive kidney damage" },
+  glaucoma:                  { icon: "👁️", color: "blue",   desc: "Eye pressure & vision loss" },
+  gastroenteritis:           { icon: "🤢", color: "green",  desc: "Stomach and bowel infection" },
+  neonatal_sepsis:           { icon: "👶", color: "yellow", desc: "Newborn bloodstream infection" },
+  lymphatic_filariasis:      { icon: "🦷", color: "blue",   desc: "Parasitic lymph system disease" },
+  onchocerciasis:            { icon: "🪲", color: "green",  desc: "River blindness disease" },
+  river_blindness:           { icon: "🪲", color: "green",  desc: "Blackfly-transmitted parasitic disease" },
+  acute_otitis_media:        { icon: "👂", color: "yellow", desc: "Middle ear infection" },
+  otitis_media:              { icon: "👂", color: "yellow", desc: "Ear infection" },
+  pyelonephritis:            { icon: "🫘", color: "blue",   desc: "Kidney infection" },
+  meningococcal_disease:     { icon: "🧠", color: "blue",   desc: "Bacterial meningococcal infection" },
+  meningococcal_meningitis:  { icon: "🧠", color: "blue",   desc: "Meningococcal meningitis" },
+  acute_angle_closure_glaucoma: { icon: "👁️", color: "blue", desc: "Acute eye pressure emergency" },
+};
+
+const COLORS = ["green", "blue", "yellow"] as const;
+const DEFAULT_META = (i: number) => ({
+  icon: "🏥",
+  color: COLORS[i % 3],
+  desc: "Medical condition",
+});
 
 const colorStyles: Record<string, { card: string; badge: string; icon: string }> = {
   green: {
@@ -50,12 +66,23 @@ const colorStyles: Record<string, { card: string; badge: string; icon: string }>
 
 export default function DiseasesPage() {
   const router = useRouter();
+  const { user, logout } = useUser();
   const [search, setSearch] = useState("");
+  const [apiDiseases, setApiDiseases] = useState<ApiDisease[]>([]);
+  const [loadingDiseases, setLoadingDiseases] = useState(true);
 
-  const filtered = DISEASES.filter(
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/diseases")
+      .then((r) => r.json())
+      .then((data: ApiDisease[]) => setApiDiseases(data))
+      .catch(() => {})
+      .finally(() => setLoadingDiseases(false));
+  }, []);
+
+  const filtered = apiDiseases.filter(
     (d) =>
-      d.label.toLowerCase().includes(search.toLowerCase()) ||
-      d.desc.toLowerCase().includes(search.toLowerCase())
+      d.disease.toLowerCase().includes(search.toLowerCase()) ||
+      d.slug.replace(/_/g, " ").includes(search.toLowerCase())
   );
 
   return (
@@ -77,6 +104,17 @@ export default function DiseasesPage() {
             <span className="text-gray-800 font-bold">Disease Chat</span>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
+                <span className="text-green-700 font-bold text-xs">{user.first_name[0]}{user.last_name[0]}</span>
+              </div>
+              <span className="text-sm text-gray-600 hidden sm:block">{user.first_name} {user.last_name}</span>
+            </div>
+          )}
+          <button onClick={logout} className="text-sm text-gray-400 hover:text-red-500 transition-colors">Logout</button>
+        </div>
       </nav>
 
       {/* Header */}
@@ -85,6 +123,11 @@ export default function DiseasesPage() {
         <p className="text-green-100 text-sm max-w-lg">
           Choose a disease below to start an in-depth chat about its symptoms, causes, treatment and prevention.
         </p>
+        {!loadingDiseases && (
+          <p className="text-green-200 text-xs mt-2">
+            {apiDiseases.length} disease{apiDiseases.length !== 1 ? "s" : ""} available
+          </p>
+        )}
       </div>
 
       <main className="flex-1 px-4 md:px-10 py-8 max-w-6xl mx-auto w-full">
@@ -102,25 +145,39 @@ export default function DiseasesPage() {
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {loadingDiseases ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl border-2 border-gray-100 p-5 animate-pulse">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 mb-3" />
+                <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
+                <div className="h-3 bg-gray-100 rounded w-full mb-1" />
+                <div className="h-3 bg-gray-100 rounded w-2/3" />
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
-            <p className="text-lg font-medium">No diseases match your search.</p>
+            <p className="text-lg font-medium">
+              {search ? "No diseases match your search." : "No diseases available."}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filtered.map((disease) => {
-              const styles = colorStyles[disease.color];
+            {filtered.map((disease, i) => {
+              const meta = DISEASE_META[disease.slug] ?? DEFAULT_META(i);
+              const styles = colorStyles[meta.color];
               return (
                 <button
-                  key={disease.id}
-                  onClick={() => router.push(`/chat/${disease.id}`)}
+                  key={disease.slug}
+                  onClick={() => router.push(`/chat/${disease.slug}`)}
                   className={`text-left bg-white rounded-2xl border-2 p-5 transition-all duration-200 hover:shadow-md ${styles.card} group`}
                 >
                   <div className={`w-12 h-12 rounded-xl ${styles.icon} flex items-center justify-center text-2xl mb-3`}>
-                    {disease.icon}
+                    {meta.icon}
                   </div>
-                  <h3 className="font-bold text-gray-800 text-sm leading-tight mb-1">{disease.label}</h3>
-                  <p className="text-gray-500 text-xs mb-3">{disease.desc}</p>
+                  <h3 className="font-bold text-gray-800 text-sm leading-tight mb-1">{disease.disease}</h3>
+                  <p className="text-gray-500 text-xs mb-3">{meta.desc}</p>
                   <div className="flex items-center gap-1 text-xs font-semibold text-green-600 group-hover:gap-2 transition-all">
                     Chat now
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3 h-3">

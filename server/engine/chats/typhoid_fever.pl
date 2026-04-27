@@ -1,11 +1,10 @@
-:- module(chatbot_diagnostic_malaria, [
+:- module(chatbot_diagnostic_typhoid, [
     risk_factor/1,
     symptom/1,
     diagnostic_start/0,
     diagnostic_risk_evaluation_complete/1,
     prevention_tip/1,
     diagnostic_explain_factors/0,
-    % diagnostic_evaluate_risks/0,
     diagnostic_generate_report/0,
     diagnostic_factor_weight/2,
     advise/2,
@@ -17,59 +16,59 @@
 :- dynamic user_data/3.
 
 % =========================
-% Symptoms of Malaria
+% Symptoms of Typhoid Fever
 % =========================
-symptom(fever).
-symptom(chills).
+symptom(prolonged_fever).
+symptom(abdominal_pain).
 symptom(headache).
-symptom(nausea).
-symptom(vomiting).
-symptom(fatigue).
-symptom(sweating).
+symptom(constipation).
+symptom(diarrhea).
+symptom(weakness).
+symptom(reduced_appetite).
 
 % =========================
-% Risk Factors
+% Risk Factors / Discriminating Features
 % =========================
-risk_factor(mosquito_exposure).
-risk_factor(no_bed_net).
-risk_factor(stagnant_water_nearby).
-risk_factor(recent_travel_high_risk_area).
-risk_factor(weak_immunity).
+risk_factor(unsafe_food_water).
+risk_factor(relative_bradycardia).
+risk_factor(rose_spots).
+risk_factor(abdominal_tenderness).
+risk_factor(stepwise_fever).
 
 % =========================
 % Weights
 % =========================
-diagnostic_factor_weight(fever, 10).
-diagnostic_factor_weight(chills, 8).
-diagnostic_factor_weight(headache, 6).
-diagnostic_factor_weight(nausea, 5).
-diagnostic_factor_weight(vomiting, 6).
-diagnostic_factor_weight(fatigue, 5).
-diagnostic_factor_weight(sweating, 6).
+diagnostic_factor_weight(prolonged_fever, 10).
+diagnostic_factor_weight(abdominal_pain, 8).
+diagnostic_factor_weight(headache, 7).
+diagnostic_factor_weight(constipation, 6).
+diagnostic_factor_weight(diarrhea, 6).
+diagnostic_factor_weight(weakness, 7).
+diagnostic_factor_weight(reduced_appetite, 7).
 
-diagnostic_factor_weight(mosquito_exposure, 8).
-diagnostic_factor_weight(no_bed_net, 6).
-diagnostic_factor_weight(stagnant_water_nearby, 7).
-diagnostic_factor_weight(recent_travel_high_risk_area, 9).
-diagnostic_factor_weight(weak_immunity, 7).
+diagnostic_factor_weight(unsafe_food_water, 9).
+diagnostic_factor_weight(relative_bradycardia, 9).
+diagnostic_factor_weight(rose_spots, 10).
+diagnostic_factor_weight(abdominal_tenderness, 8).
+diagnostic_factor_weight(stepwise_fever, 9).
 
 % =========================
 % Questions
 % =========================
 collect_data :-
-    ask_question("Do you have fever? (yes/no/sometimes)", fever),
-    ask_question("Do you experience chills? (yes/no/sometimes)", chills),
+    ask_question("Do you have a prolonged fever lasting several days? (yes/no/sometimes)", prolonged_fever),
+    ask_question("Do you have abdominal pain? (yes/no/sometimes)", abdominal_pain),
     ask_question("Do you have headaches? (yes/no/sometimes)", headache),
-    ask_question("Do you feel nausea? (yes/no/sometimes)", nausea),
-    ask_question("Are you vomiting? (yes/no/sometimes)", vomiting),
-    ask_question("Do you feel fatigue? (yes/no/sometimes)", fatigue),
-    ask_question("Do you sweat excessively? (yes/no/sometimes)", sweating),
+    ask_question("Are you experiencing constipation? (yes/no/sometimes)", constipation),
+    ask_question("Are you experiencing diarrhea? (yes/no/sometimes)", diarrhea),
+    ask_question("Do you feel weak or fatigued? (yes/no/sometimes)", weakness),
+    ask_question("Have you noticed a reduced appetite? (yes/no/sometimes)", reduced_appetite),
 
-    ask_question("Are you frequently exposed to mosquitoes? (yes/no/sometimes)", mosquito_exposure),
-    ask_question("Do you sleep without a mosquito net? (yes/no/sometimes)", no_bed_net),
-    ask_question("Is there stagnant water near your home? (yes/no/sometimes)", stagnant_water_nearby),
-    ask_question("Have you recently traveled to a high-risk malaria area? (yes/no)", recent_travel_high_risk_area),
-    ask_question("Do you have weak immunity? (yes/no/sometimes)", weak_immunity).
+    ask_question("Have you consumed unsafe food or water recently? (yes/no)", unsafe_food_water),
+    ask_question("Have you been told your heart rate is unusually slow relative to fever (relative bradycardia)? (yes/no)", relative_bradycardia),
+    ask_question("Do you have faint pink spots on your skin (rose spots)? (yes/no/sometimes)", rose_spots),
+    ask_question("Do you feel tenderness in your abdomen? (yes/no/sometimes)", abdominal_tenderness),
+    ask_question("Does your fever increase gradually in a stepwise pattern? (yes/no/sometimes)", stepwise_fever).
 
 % =========================
 % Input Handling
@@ -126,23 +125,23 @@ diagnostic_risk_evaluation_complete(Probability) :-
 % =========================
 advise(Probability, Advice) :-
     (Probability >= 70 ->
-        Advice = "HIGH risk of malaria. Seek medical attention immediately and get tested.";
+        Advice = "HIGH risk of typhoid fever. Seek immediate medical testing and antibiotic treatment.";
      Probability >= 40 ->
-        Advice = "MODERATE risk of malaria. Monitor symptoms and consider medical testing.";
-     Advice = "LOW risk of malaria. Continue preventive measures.").
+        Advice = "MODERATE risk. Visit a healthcare provider for proper evaluation and testing.";
+     Advice = "LOW risk. Maintain hygiene and monitor symptoms closely.").
 
 % =========================
 % Prevention Tips
 % =========================
-prevention_tip("Sleep under insecticide-treated mosquito nets.").
-prevention_tip("Use mosquito repellents on exposed skin.").
-prevention_tip("Eliminate stagnant water around your home.").
-prevention_tip("Wear protective clothing, especially at night.").
-prevention_tip("Ensure proper drainage systems.").
-prevention_tip("Take antimalarial drugs when traveling to high-risk areas.").
+prevention_tip("Drink clean and treated water.").
+prevention_tip("Practice proper hand hygiene.").
+prevention_tip("Avoid eating unsafe or street food.").
+prevention_tip("Ensure proper sanitation and waste disposal.").
+prevention_tip("Get vaccinated against typhoid where available.").
+prevention_tip("Cook food thoroughly before consumption.").
 
 display_prevention_tips :-
-    writeln("=== Malaria Prevention Tips ==="),
+    writeln("=== Typhoid Fever Prevention Tips ==="),
     findall(Tip, prevention_tip(Tip), Tips),
     display_tips(Tips).
 
@@ -155,12 +154,12 @@ display_tips([H|T]) :-
 % Report
 % =========================
 diagnostic_generate_report :-
-    writeln("=== Malaria Diagnostic Report ==="),
+    writeln("=== Typhoid Fever Diagnostic Report ==="),
     findall((F,R,S), user_data(F,R,S), Data),
     display_data(Data),
     diagnostic_risk_evaluation_complete(P),
     advise(P, A),
-    format("Estimated Malaria Risk: ~2f%%~n", [P]),
+    format("Estimated Risk: ~2f%%~n", [P]),
     format("Advice: ~w~n", [A]).
 
 display_data([]).
@@ -172,7 +171,7 @@ display_data([(F,R,S)|T]) :-
 % Explanation
 % =========================
 diagnostic_explain_factors :-
-    writeln("=== Malaria Symptoms ==="),
+    writeln("=== Typhoid Fever Symptoms ==="),
     findall(S, symptom(S), Symptoms),
     writeln(Symptoms),
     writeln("\n=== Risk Factors ==="),
@@ -183,9 +182,9 @@ diagnostic_explain_factors :-
 % Main Menu
 % =========================
 diagnostic_start :-
-    writeln("Welcome to the Malaria Diagnostic Chatbot!"),
+    writeln("Welcome to the Typhoid Fever Diagnostic Chatbot!"),
     writeln("1. Evaluate symptoms"),
-    writeln("2. Learn about malaria"),
+    writeln("2. Learn about typhoid fever"),
     writeln("3. Prevention tips"),
     writeln("4. Generate report"),
     writeln("5. Quit"),

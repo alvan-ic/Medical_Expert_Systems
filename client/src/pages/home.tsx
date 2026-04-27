@@ -1,7 +1,9 @@
 import { useRouter } from "next/router";
+import { useUser } from "@/hooks/useUser";
 
 export default function HomePage() {
   const router = useRouter();
+  const { user, loading, logout } = useUser();
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -16,13 +18,36 @@ export default function HomePage() {
           <span className="text-green-700 font-bold text-lg">MedDiagnose</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-gray-500 text-sm hidden sm:block">Medical Diagnosis Expert System</span>
-          <button
-            onClick={() => router.push("/")}
-            className="text-sm text-gray-500 hover:text-red-500 transition-colors"
-          >
-            Logout
-          </button>
+          {loading ? (
+            <div className="w-24 h-4 bg-gray-100 rounded animate-pulse" />
+          ) : user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <span className="text-green-700 font-bold text-sm">
+                    {user.first_name[0]}{user.last_name[0]}
+                  </span>
+                </div>
+                <div className="hidden sm:block text-right">
+                  <p className="text-sm font-semibold text-gray-700 leading-tight">{user.first_name} {user.last_name}</p>
+                  <p className="text-xs text-gray-400 leading-tight">{user.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                className="text-sm text-gray-400 hover:text-red-500 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={logout}
+              className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </nav>
 
@@ -47,6 +72,11 @@ export default function HomePage() {
       </div>
 
       <main className="flex-1 px-4 md:px-10 py-10 max-w-6xl mx-auto w-full">
+        {user && (
+          <p className="text-gray-700 font-semibold text-lg mb-1">
+            Welcome back, <span className="text-green-600">{user.first_name}</span> 👋
+          </p>
+        )}
         <h2 className="text-gray-500 font-semibold text-xs uppercase tracking-wider mb-5">What would you like to do?</h2>
 
         {/* Action cards */}
