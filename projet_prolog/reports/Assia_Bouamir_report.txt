@@ -1,0 +1,20 @@
+
+    Patient Report:
+    ===========================
+    Name: Assia Bouamir
+    Email: a.bouamir8225@uca.ac.ma
+    Phone: 0774424319
+    Birth Date: 03/29/2021
+    Gender: male
+    Recipient: self
+
+    Detected Conditions:
+    ===========================
+    No conditions detected.
+
+    Prediction:
+    ===========================
+    No conditions detected based on symptoms.
+
+    Date: 2024-11-21 13:25:16
+    

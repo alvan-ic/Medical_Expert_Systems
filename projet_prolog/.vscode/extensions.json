@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "pycom.pymakr-preview",
+        "rebornix.prolog",
+        "amauryrabouan.new-vsc-prolog",
+        "formulahendry.code-runner"
+    ]
+}

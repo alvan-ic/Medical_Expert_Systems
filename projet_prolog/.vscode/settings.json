@@ -1,0 +1,11 @@
+{
+    "files.autoSave": "afterDelay",
+    "voiceSnippets.serverPort": 3072,
+    "prolog.executablePath": "C:\\Program Files\\swipl\\bin\\swipl.exe",
+    "prolog.linter.enableMsgInOutput": true,
+    "npm.enableRunFromFolder": true,
+    "npm.runSilent": true,
+    "prolog.terminal.runtimeArgs": [
+
+    ]
+}
