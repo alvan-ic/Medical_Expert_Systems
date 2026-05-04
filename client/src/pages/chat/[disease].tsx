@@ -7,88 +7,154 @@ type Message = {
   text: string;
 };
 
-const DISEASE_INFO: Record<string, { label: string; icon: string; color: string; intro: string }> = {
-  malaria: { label: "Malaria", icon: "🦟", color: "green", intro: "Hello! I'm your Malaria expert. You can ask me about symptoms, causes, treatment, prevention, or anything else about Malaria." },
-  tuberculosis: { label: "Tuberculosis", icon: "🫁", color: "blue", intro: "Hi there! I specialize in Tuberculosis (TB). Feel free to ask about TB symptoms, diagnosis, treatment (DOTS), and prevention." },
-  hiv_aids: { label: "HIV/AIDS", icon: "🔬", color: "yellow", intro: "Hello! I'm here to help you understand HIV/AIDS — covering transmission, stages, ARV treatment, and living with HIV." },
-  pneumonia: { label: "Pneumonia", icon: "💨", color: "blue", intro: "Hi! Ask me anything about Pneumonia — its causes (bacterial, viral, fungal), symptoms, treatment, and prevention." },
-  cholera: { label: "Cholera", icon: "💧", color: "green", intro: "Hello! I can answer questions about Cholera — its causes, the role of contaminated water, rehydration therapy, and outbreaks." },
-  typhoid_fever: { label: "Typhoid Fever", icon: "🌡️", color: "yellow", intro: "Hi! Ask me about Typhoid Fever — Salmonella typhi, symptoms, antibiotics, and vaccine options." },
-  diabetes_mellitus_type_2: { label: "Diabetes (Type 2)", icon: "🩸", color: "yellow", intro: "Hello! I specialize in Type 2 Diabetes. Ask about blood sugar management, insulin resistance, diet, medications, and complications." },
-  hypertension: { label: "Hypertension", icon: "❤️", color: "blue", intro: "Hi! Let's talk about Hypertension (high blood pressure) — risk factors, lifestyle changes, medications, and long-term management." },
-  hepatitis_b: { label: "Hepatitis B", icon: "🫀", color: "green", intro: "Hello! Ask me about Hepatitis B — vaccination, transmission, liver damage, antiviral treatment, and chronic HBV." },
-  hepatitis_c: { label: "Hepatitis C", icon: "🧬", color: "yellow", intro: "Hi! I can help with Hepatitis C — how it spreads, symptoms, direct-acting antivirals, and cure rates." },
-  bacterial_meningitis: { label: "Bacterial Meningitis", icon: "🧠", color: "blue", intro: "Hello! I specialize in Bacterial Meningitis — a medical emergency. Ask about signs, lumbar puncture, antibiotics, and vaccines." },
-  asthma: { label: "Asthma", icon: "🌬️", color: "green", intro: "Hi! Ask me about Asthma — triggers, inhalers, peak flow monitoring, action plans, and long-term control." },
-  peptic_ulcer_disease: { label: "Peptic Ulcer Disease", icon: "🫃", color: "yellow", intro: "Hello! Ask me about Peptic Ulcers — H. pylori infection, NSAID-related ulcers, acid suppression therapy, and diet." },
-  measles: { label: "Measles", icon: "🔴", color: "blue", intro: "Hi! I can answer questions about Measles — the MMR vaccine, Koplik's spots, complications, and outbreak control." },
-  urinary_tract_infection: { label: "UTI", icon: "🚰", color: "green", intro: "Hello! Ask me about UTIs — symptoms, common bacteria (E. coli), antibiotic treatment, and prevention tips." },
-  yellow_fever: { label: "Yellow Fever", icon: "🟡", color: "yellow", intro: "Hi! Let's discuss Yellow Fever — Aedes mosquitoes, hemorrhagic symptoms, the 17D vaccine, and endemic zones." },
-  lassa_fever: { label: "Lassa Fever", icon: "🐀", color: "blue", intro: "Hello! I specialize in Lassa Fever — rodent exposure, hemorrhagic symptoms, ribavirin treatment, and isolation protocols." },
-  sickle_cell_disease: { label: "Sickle Cell Disease", icon: "🔴", color: "green", intro: "Hi! Ask about Sickle Cell Disease — hemoglobin S, painful crises, hydroxyurea, blood transfusions, and genetic counseling." },
-  chronic_kidney_disease: { label: "Chronic Kidney Disease", icon: "🫘", color: "yellow", intro: "Hello! I can help with CKD — GFR stages, dialysis, dietary restrictions, medications, and kidney transplant." },
-  glaucoma: { label: "Glaucoma", icon: "👁️", color: "blue", intro: "Hi! Let's talk about Glaucoma — intraocular pressure, optic nerve damage, eye drops, laser treatment, and vision preservation." },
-  gastroenteritis: { label: "Gastroenteritis", icon: "🤢", color: "green", intro: "Hello! Ask me about Gastroenteritis — viral vs bacterial causes, ORS, food safety, and when to seek help." },
-  neonatal_sepsis: { label: "Neonatal Sepsis", icon: "👶", color: "yellow", intro: "Hi! I specialize in Neonatal Sepsis — a critical newborn condition. Ask about risk factors, signs, IV antibiotics, and NICU care." },
-  lymphatic_filariasis: { label: "Lymphatic Filariasis", icon: "🦷", color: "blue", intro: "Hello! Ask me about Lymphatic Filariasis — filarial worms, elephantiasis, MDA treatment programs, and prevention." },
-  onchocerciasis: { label: "Onchocerciasis", icon: "🪲", color: "green", intro: "Hi! Let's discuss Onchocerciasis (River Blindness) — blackfly transmission, ivermectin therapy, and eye disease." },
-  acute_otitis_media: { label: "Otitis Media", icon: "👂", color: "yellow", intro: "Hello! Ask me about Otitis Media (ear infection) — causes, symptoms in children, antibiotics, and ear tube surgery." },
-  pyelonephritis: { label: "Pyelonephritis", icon: "🫘", color: "blue", intro: "Hi! I can answer questions about Pyelonephritis (kidney infection) — symptoms, urine culture, IV antibiotics, and prevention." },
+type QuickReply = { label: string; value: string };
+
+const DISEASE_INFO: Record<string, { label: string; icon: string; color: string }> = {
+  malaria:                 { label: "Malaria",                       icon: "🦟", color: "green"  },
+  tuberculosis:            { label: "Tuberculosis",                  icon: "🫁", color: "blue"   },
+  hiv_aids:                { label: "HIV/AIDS",                      icon: "🔬", color: "yellow" },
+  pneumonia:               { label: "Pneumonia",                     icon: "💨", color: "blue"   },
+  cholera:                 { label: "Cholera",                       icon: "💧", color: "green"  },
+  typhoid_fever:           { label: "Typhoid Fever",                 icon: "🌡️", color: "yellow" },
+  diabetes_mellitus_type_2:{ label: "Diabetes (Type 2)",             icon: "🩸", color: "yellow" },
+  hypertension:            { label: "Hypertension",                  icon: "❤️", color: "blue"   },
+  hepatitis_b:             { label: "Hepatitis B",                   icon: "🫀", color: "green"  },
+  hepatitis_c:             { label: "Hepatitis C",                   icon: "🧬", color: "yellow" },
+  bacterial_meningitis:    { label: "Bacterial Meningitis",          icon: "🧠", color: "blue"   },
+  asthma:                  { label: "Asthma",                        icon: "🌬️", color: "green"  },
+  peptic_ulcer_disease:    { label: "Peptic Ulcer Disease",          icon: "🫃", color: "yellow" },
+  measles:                 { label: "Measles",                       icon: "🔴", color: "blue"   },
+  urinary_tract_infection: { label: "UTI",                           icon: "🚰", color: "green"  },
+  yellow_fever:            { label: "Yellow Fever",                  icon: "🟡", color: "yellow" },
+  lassa_fever:             { label: "Lassa Fever",                   icon: "🐀", color: "blue"   },
+  sickle_cell_disease:     { label: "Sickle Cell Disease",           icon: "🔴", color: "green"  },
+  chronic_kidney_disease:  { label: "Chronic Kidney Disease",        icon: "🫘", color: "yellow" },
+  glaucoma:                { label: "Glaucoma",                      icon: "👁️", color: "blue"   },
+  gastroenteritis:         { label: "Gastroenteritis",               icon: "🤢", color: "green"  },
+  neonatal_sepsis:         { label: "Neonatal Sepsis",               icon: "👶", color: "yellow" },
+  lymphatic_filariasis:    { label: "Lymphatic Filariasis",          icon: "🦷", color: "blue"   },
+  onchocerciasis:          { label: "Onchocerciasis",                icon: "🪲", color: "green"  },
+  acute_otitis_media:      { label: "Otitis Media",                  icon: "👂", color: "yellow" },
+  pyelonephritis:          { label: "Pyelonephritis",                icon: "🫘", color: "blue"   },
 };
 
-const FALLBACK_INFO = {
-  label: "Disease",
-  icon: "🏥",
-  color: "green",
-  intro: "Hello! Ask me anything about this condition — symptoms, causes, treatment, and prevention.",
-};
+const FALLBACK_INFO = { label: "Disease", icon: "🏥", color: "green" };
 
-const colorStyles: Record<string, { header: string; bubble: string; userBubble: string; button: string; border: string }> = {
+const colorStyles: Record<string, {
+  header: string; bubble: string; userBubble: string;
+  button: string; border: string; quickReply: string;
+}> = {
   green: {
-    header: "from-green-700 to-green-500",
-    bubble: "bg-green-50 border border-green-100 text-gray-800",
+    header:     "from-green-700 to-green-500",
+    bubble:     "bg-green-50 border border-green-100 text-gray-800",
     userBubble: "bg-green-600 text-white",
-    button: "bg-green-600 hover:bg-green-700",
-    border: "focus:ring-green-400",
+    button:     "bg-green-600 hover:bg-green-700",
+    border:     "focus:ring-green-400",
+    quickReply: "border-gray-200 hover:border-green-400 hover:text-green-700",
   },
   blue: {
-    header: "from-blue-700 to-blue-500",
-    bubble: "bg-blue-50 border border-blue-100 text-gray-800",
+    header:     "from-blue-700 to-blue-500",
+    bubble:     "bg-blue-50 border border-blue-100 text-gray-800",
     userBubble: "bg-blue-600 text-white",
-    button: "bg-blue-600 hover:bg-blue-700",
-    border: "focus:ring-blue-400",
+    button:     "bg-blue-600 hover:bg-blue-700",
+    border:     "focus:ring-blue-400",
+    quickReply: "border-gray-200 hover:border-blue-400 hover:text-blue-700",
   },
   yellow: {
-    header: "from-yellow-600 to-yellow-400",
-    bubble: "bg-yellow-50 border border-yellow-100 text-gray-800",
+    header:     "from-yellow-600 to-yellow-400",
+    bubble:     "bg-yellow-50 border border-yellow-100 text-gray-800",
     userBubble: "bg-yellow-500 text-white",
-    button: "bg-yellow-500 hover:bg-yellow-600",
-    border: "focus:ring-yellow-400",
+    button:     "bg-yellow-500 hover:bg-yellow-600",
+    border:     "focus:ring-yellow-400",
+    quickReply: "border-gray-200 hover:border-yellow-400 hover:text-yellow-700",
   },
 };
 
-const SUGGESTED_QUESTIONS = [
-  "What are the main symptoms?",
-  "How is it diagnosed?",
-  "What is the treatment?",
-  "How can I prevent it?",
-  "What causes this disease?",
-  "Who is most at risk?",
-];
+function getQuickReplies(messages: Message[]): QuickReply[] {
+  if (!messages.length) return [];
+  const last = messages[messages.length - 1];
+  if (last.role !== "assistant") return [];
+  const t = last.text;
+
+  if (t.includes("(yes / no / sometimes)")) {
+    return [
+      { label: "Yes",       value: "yes"       },
+      { label: "No",        value: "no"        },
+      { label: "Sometimes", value: "sometimes" },
+    ];
+  }
+  if (t.includes("scale of 1 to 10")) {
+    return Array.from({ length: 10 }, (_, i) => ({
+      label: String(i + 1),
+      value: String(i + 1),
+    }));
+  }
+  if (t.includes("1. Evaluate symptoms")) {
+    return [
+      { label: "1. Evaluate symptoms", value: "1" },
+      { label: "2. Learn about disease", value: "2" },
+      { label: "3. Prevention tips",   value: "3" },
+      { label: "4. Generate report",   value: "4" },
+      { label: "5. Quit",              value: "5" },
+    ];
+  }
+  return [];
+}
+
+function getPlaceholder(messages: Message[], label: string): string {
+  if (!messages.length) return `Loading ${label} chatbot...`;
+  const last = messages[messages.length - 1];
+  if (last.role !== "assistant") return `Ask about ${label}...`;
+  const t = last.text;
+  if (t.includes("(yes / no / sometimes)")) return "Type: yes, no, or sometimes";
+  if (t.includes("scale of 1 to 10"))       return "Enter a number from 1 to 10";
+  if (t.includes("1. Evaluate symptoms"))    return "Type 1–5 to choose an option";
+  return `Ask about ${label}...`;
+}
+
+function renderText(text: string) {
+  return text.split("\n").map((line, i, arr) => {
+    const parts = line.split(/\*\*(.+?)\*\*/g);
+    return (
+      <span key={i}>
+        {parts.map((p, j) => (j % 2 === 1 ? <strong key={j}>{p}</strong> : p))}
+        {i < arr.length - 1 && <br />}
+      </span>
+    );
+  });
+}
 
 export default function ChatPage() {
   const router = useRouter();
   const { user, logout } = useUser();
   const { disease } = router.query;
-  const info = (typeof disease === "string" && DISEASE_INFO[disease]) ? DISEASE_INFO[disease] : FALLBACK_INFO;
+  const info   = (typeof disease === "string" && DISEASE_INFO[disease]) ? DISEASE_INFO[disease] : FALLBACK_INFO;
   const styles = colorStyles[info.color];
 
-  const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", text: info.intro },
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input,    setInput]    = useState("");
+  const [loading,  setLoading]  = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const initRef   = useRef(false);
+
+  // Fetch initial menu from backend on first render
+  useEffect(() => {
+    if (typeof disease !== "string" || initRef.current) return;
+    initRef.current = true;
+    setLoading(true);
+    fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ disease, message: "", history: [] }),
+    })
+      .then(r => r.json())
+      .then(data => setMessages([{ role: "assistant", text: data.reply }]))
+      .catch(() => setMessages([{
+        role: "assistant",
+        text: `Welcome to the **${info.label}** Diagnostic Chatbot!\n\n1. Evaluate symptoms\n2. Learn about ${info.label}\n3. Prevention tips\n4. Generate report\n5. Quit`,
+      }]))
+      .finally(() => setLoading(false));
+  }, [disease]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -97,7 +163,8 @@ export default function ChatPage() {
   async function sendMessage(text: string) {
     if (!text.trim()) return;
     const userMsg: Message = { role: "user", text: text.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedHistory = [...messages, userMsg];
+    setMessages(updatedHistory);
     setInput("");
     setLoading(true);
 
@@ -106,23 +173,22 @@ export default function ChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          disease: disease,
+          disease,
           message: text.trim(),
-          history: messages.map((m) => ({ role: m.role, content: m.text })),
+          history: messages.map(m => ({ role: m.role, content: m.text })),
         }),
       });
-
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
-      setMessages((prev) => [...prev, { role: "assistant", text: data.reply || "I'm not sure about that. Please try rephrasing your question." }]);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        text: data.reply || "I'm not sure about that. Please try rephrasing.",
+      }]);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          text: "I couldn't reach the server right now. Please make sure the backend is running and try again.",
-        },
-      ]);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        text: "I couldn't reach the server right now. Please make sure the backend is running and try again.",
+      }]);
     } finally {
       setLoading(false);
     }
@@ -132,6 +198,8 @@ export default function ChatPage() {
     e.preventDefault();
     sendMessage(input);
   }
+
+  const quickReplies = getQuickReplies(messages);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -184,7 +252,7 @@ export default function ChatPage() {
                   : `${styles.bubble} rounded-bl-sm`
               }`}
             >
-              {msg.text}
+              {renderText(msg.text)}
             </div>
           </div>
         ))}
@@ -205,18 +273,17 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggested questions */}
-      {messages.length <= 2 && !loading && (
+      {/* Dynamic quick-reply buttons */}
+      {!loading && quickReplies.length > 0 && (
         <div className="px-4 md:px-8 pb-2 max-w-3xl mx-auto w-full">
-          <p className="text-xs text-gray-400 mb-2 font-medium">Suggested questions:</p>
           <div className="flex flex-wrap gap-2">
-            {SUGGESTED_QUESTIONS.map((q) => (
+            {quickReplies.map(qr => (
               <button
-                key={q}
-                onClick={() => sendMessage(q)}
-                className="text-xs bg-white border border-gray-200 text-gray-600 rounded-full px-3 py-1.5 hover:border-green-400 hover:text-green-700 transition-colors"
+                key={qr.value}
+                onClick={() => sendMessage(qr.value)}
+                className={`text-xs bg-white border text-gray-600 rounded-full px-3 py-1.5 transition-colors ${styles.quickReply}`}
               >
-                {q}
+                {qr.label}
               </button>
             ))}
           </div>
@@ -232,8 +299,8 @@ export default function ChatPage() {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={`Ask about ${info.label}...`}
+            onChange={e => setInput(e.target.value)}
+            placeholder={getPlaceholder(messages, info.label)}
             disabled={loading}
             className={`flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 ${styles.border} disabled:opacity-60`}
           />

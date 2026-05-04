@@ -25,5 +25,6 @@ def load_knowledge_base():
     prolog.consult("engine/diagnosis.pl")
     prolog.consult("engine/symptoms.pl")
     prolog.consult("engine/diseases.pl")
+    prolog.consult("engine/chats/malaria.pl")
     # for path, _ in DISEASE_FILES.values():
     #     prolog.consult(path)

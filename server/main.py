@@ -6,6 +6,7 @@ from database import init_db
 from prolog_engine import prolog, prolog_lock, load_knowledge_base
 from routes.auth import router as auth_router
 from routes.chat import router as chat_router
+from routes.chat_freetext import router as chat_freetext_router
 
 
 app = FastAPI()
@@ -20,6 +21,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(chat_router)
+app.include_router(chat_freetext_router)
 
 init_db()
 load_knowledge_base()

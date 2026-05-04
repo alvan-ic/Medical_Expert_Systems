@@ -60,6 +60,20 @@ class DiagnoseResponse(BaseModel):
     risk_level: str  # "HIGH", "MODERATE", "LOW"
 
 
+# Chat models
+class ChatMessage(BaseModel):
+    role: str  # "user" or "assistant"
+    content: str
+
+class ChatRequest(BaseModel):
+    disease: str
+    message: str
+    history: List[ChatMessage] = []
+
+class ChatResponse(BaseModel):
+    reply: str
+
+
 # Auth models
 class SignupRequest(BaseModel):
     first_name: str
